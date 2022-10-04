@@ -35,8 +35,7 @@ class NewBoard:
 
 
 
-
-
+#changes
 
 
 board = NewBoard(5,5)
