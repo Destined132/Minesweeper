@@ -35,7 +35,6 @@ class NewBoard:
 
 
 
-#changes
 
 
 board = NewBoard(5,5)
@@ -45,6 +44,8 @@ for i in range(5):
     print(board.grid[i])
 
 print(board.grid[3][4])
+
+
 
 
 
