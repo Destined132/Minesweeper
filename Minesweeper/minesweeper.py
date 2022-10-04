@@ -2,7 +2,7 @@
 import random
 
 
-difficulty = 2  # 0 - 3
+
 
 class NewBoard:
 
@@ -35,15 +35,47 @@ class NewBoard:
 
 
 
+        for i in range(0,self.cols):
+            for j in range(0, self.rows):
+
+                if self.grid[i][j] != -1:    
+                    mineCount = 0
+                    
+                    for k in range(-1,2):
+                        for l in range(-1,2):
+
+                            try:
+                                if i+k >= 0 and j+l >= 0 and self.grid[i+k][j+l] == -1:
+                                    mineCount += 1
+                            
+                            except IndexError:
+                                pass
+                            
+                                
+                    self.grid[i][j] = mineCount
 
 
-board = NewBoard(5,5)
+
+
+
+
+
+
+
+
+difficulty = 2  # 0 - 3
+
+board = NewBoard(5,10)
 board.placeMines(difficulty)
+
 
 for i in range(5):
     print(board.grid[i])
 
 print(board.grid[3][4])
+
+
+
 
 
 
