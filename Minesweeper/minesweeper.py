@@ -2,7 +2,7 @@
 import random
 
 
-difficulty = 3  # 0 - 3
+difficulty = 2  # 0 - 3
 
 class NewBoard:
 
@@ -24,11 +24,11 @@ class NewBoard:
         numberOfMines = (board.cols * board.rows * difficulty) // 5
 
         for i in range(numberOfMines):
-            x = random.randint(0,self.rows)
-            y = random.randint(0,self.rows)
+            x = random.randint(0,self.cols-1)
+            y = random.randint(0,self.rows-1)
 
-            if self.grid[x][y]:
-                self.grid[x][y] = "-1"  #  -1 is a mine
+            if self.grid[x][y] != -1:
+                self.grid[x][y] = -1  #  -1 is a mine
 
             else:
                 numberOfMines += 1
