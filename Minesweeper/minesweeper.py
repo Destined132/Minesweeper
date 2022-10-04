@@ -47,5 +47,3 @@ print(board.grid[3][4])
 
 
 
-
-
