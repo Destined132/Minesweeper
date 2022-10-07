@@ -12,14 +12,19 @@ class NewBoard:
 
         self.grid = []
         self.tileMap = []
+        self.endMap = []
 
         
         for i in range(0,cols):
             rowsArray = []
+            endRowsArray = []
             for j in range(0, rows):
                 rowsArray.append(0)       # origin is in the top left corner    self.grid[y][x]
-            
+                endRowsArray.append(0)
             self.grid.append(rowsArray)
+            self.endMap.append(endRowsArray)
+
+        
 
     def placeMines(self, difficulty):
         numberOfMines = (board.cols * board.rows * difficulty) // 10
@@ -68,13 +73,12 @@ class NewBoard:
 
 difficulty = 2  # 0 - 3
 
-board = NewBoard(20,20)   #  (rows,cols) 
+board = NewBoard(5,5)   #  (rows,cols) 
 board.placeMines(difficulty)
 board.createTileMap()
 
 
-for i in range(len(board.tileMap)):
-    print(board.tileMap[i])
+
 
 
 
@@ -94,15 +98,30 @@ pygame.display.set_icon(icon)
 
 # colours
 dGrey = (128,128,128) # 7b
-grey  = (189,189,189) # db
+grey  = (192,192,192) # db
 white = (255,255,255) # ff
 
 # images
 pressedTileImg = pygame.image.load("Minesweeper/Assets/pressedTile.png")
 flagImg = pygame.image.load("Minesweeper/Assets/flag.png")
 tileImg = pygame.image.load("Minesweeper/Assets/hiddentile.png")
+deathTile = pygame.image.load("Minesweeper/Assets/deathTile.png")
+cross = pygame.image.load("Minesweeper/Assets/cross.png")
+
+happy = pygame.image.load("Minesweeper/Assets/happyFace.png")
+#happyPressed = pygame.image.load("Minesweeper/Assets/scaredFace.png")#
+scared = pygame.image.load("Minesweeper/Assets/scaredFace.png")
+dead = pygame.image.load("Minesweeper/Assets/deadFace.png") 
+#deadPressed = pygame.image.load("Minesweeper/Assets/deadFace.png")#
+win = pygame.image.load("Minesweeper/Assets/winFace.png")
+#winPressed = pygame.image.load("Minesweeper/Assets/winFacePressed.png")#
+
+#fonts
+font = pygame.font.Font("Minesweeper/Assets/font.ttf", 15)
+
 
 # pygame loop
+gameOver = False
 running = True
 while running:
        
@@ -111,7 +130,7 @@ while running:
             running = False
         
         #clicked tile
-        if event.type == pygame.MOUSEBUTTONUP:
+        if event.type == pygame.MOUSEBUTTONUP and gameOver == False:
             x,y = pygame.mouse.get_pos()
             
             if event.button == 1 and x>=12.5 and x<(board.cols)*25 + 12.5 and y>75 and y<=(board.rows) * 25 + 75:
@@ -149,7 +168,6 @@ while running:
                             current = visited[n]
                             for k in range(-1,2):
                                     for l in range(-1,2):
-                                        
 
                                         try:
                                             if current[0]+k >= 0 and current[1]+l >= 0 and (i,j) != (0,0) and board.tileMap[current[0]+k][current[1]+l] == 1:
@@ -159,12 +177,25 @@ while running:
                                         except IndexError:
                                             pass
                     
-                             
+                    # end game sequence
+                    if board.grid[xBox][yBox] == -1:
+                        gameOver = True
+
+                        for i in range(board.rows):
+                            for j in range(board.cols):
+                                if board.grid[j][i] == -1:
+                                    if board.tileMap[j][i] == 2:# i'm a fucking idiot who cannot index properly
+                                        board.endMap[j][i] = 1 # 1 = cross
+                                    board.tileMap[j][i] = 0
+                                    
+                        board.tileMap[xBox][yBox] = 3
+
+                        #delete
+                        for i in range(len(board.tileMap)):
+                            print(board.endMap[i])
 
 
-                        
-            
-
+        
         #flag tile
         if event.type == pygame.MOUSEBUTTONDOWN:
             x,y = pygame.mouse.get_pos()
@@ -178,13 +209,6 @@ while running:
                         board.tileMap[xBox][yBox] = 2
                     elif board.tileMap[xBox][yBox] == 2:
                         board.tileMap[xBox][yBox] = 1
-
-
-        
-
-
-
-             
 
     screen.fill(grey)
 
@@ -204,7 +228,8 @@ while running:
         pygame.draw.line(screen, dGrey,(12.5, 75 + i*25),((board.cols) * 25 + 12.5, 75 + i*25),2)
     # Grid Elements
     
-    font = pygame.font.Font("Minesweeper/Assets/font.ttf", 15)
+    
+
     for i in range(board.rows):
         for j in range(board.cols):
             element = str(board.grid[j][i])
@@ -239,16 +264,25 @@ while running:
 
 
     # Hidden tiles gen
-
-
     for i in range(board.rows):
             for j in range(board.cols):
                 if board.tileMap[j][i] == 1:
                     screen.blit(tileImg, (25 +(25*j) - (12.5) ,87.5 + (25*i) - (12.5)))   # +2 here for centering reasons
                 if board.tileMap[j][i] == 2:
                     screen.blit(flagImg, (25 +(25*j) - (12.5) ,87.5 + (25*i) - (12.5)))   # +2 here for centering reasons
+                if board.tileMap[j][i] == 3:
+                    screen.blit(deathTile, (25 +(25*j) - (12.5) ,87.5 + (25*i) - (12.5)))   # +2 here for centering reasons
+                    text_surface = font.render("*", False, (0,0,0))
+                    width, height = font.size("*")
+                    screen.blit(text_surface, (26 +(25*j) - (width/2) ,89.5 + (25*i) - (height/2)))   # can probably remove this^^
+                #end game sequence
+                
+                if board.endMap[j][i] == 1:
+                    screen.blit(cross, (25 +(25*j) - (12.5) ,87.5 + (25*i) - (12.5)))
+
             
                     
+            
 
     #pressed tile
     if pygame.mouse.get_pressed()[0]:
@@ -262,7 +296,17 @@ while running:
                 screen.blit(pressedTileImg, (25 +(25*xBox) - (12.5) ,87.5 + (25*yBox) - (12.5)))   # +2 here for centering reasons
 
 
+    # face display
+
+    if gameOver!= True:
+        screen.blit(happy, (-10 + (25*board.cols)/2,15))
+    if gameOver== True:
+        screen.blit(dead, (-10 + (25*board.cols)/2,15))
+
+
     
+
+
 
     pygame.display.flip()
     #pygame.display.update()
