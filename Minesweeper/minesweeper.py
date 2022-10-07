@@ -14,17 +14,6 @@ class NewBoard:
         self.tileMap = []
         self.endMap = []
 
-        
-        for i in range(0,cols):
-            rowsArray = []
-            endRowsArray = []
-            for j in range(0, rows):
-                rowsArray.append(0)       # origin is in the top left corner    self.grid[y][x]
-                endRowsArray.append(0)
-            self.grid.append(rowsArray)
-            self.endMap.append(endRowsArray)
-
-        
 
     def placeMines(self, difficulty):
         numberOfMines = (board.cols * board.rows * difficulty) // 10
@@ -58,7 +47,10 @@ class NewBoard:
                                 
                     self.grid[i][j] = mineCount
     
-    def createTileMap(self):
+    def createMaps(self):
+        self.tileMap.clear()
+        self.grid.clear()
+        self.endMap.clear()
 
         for i in range(0,self.cols):
             rowsArray = []
@@ -67,17 +59,38 @@ class NewBoard:
             
             self.tileMap.append(rowsArray)
 
+        for i in range(0,self.cols):
+            rowsArray = []
+            endRowsArray = []
+            for j in range(0, self.rows):
+                rowsArray.append(0)       # origin is in the top left corner    self.grid[y][x]
+                endRowsArray.append(0)
+            self.grid.append(rowsArray)
+            self.endMap.append(endRowsArray)
 
 
-
-
-difficulty = 2  # 0 - 3
 
 board = NewBoard(5,5)   #  (rows,cols) 
-board.placeMines(difficulty)
-board.createTileMap()
+difficulty = 2  # 0 - 3
 
+running = True
 
+def startGame():
+    board.createMaps()
+    board.placeMines(difficulty)
+
+    print(board.tileMap)
+    print(board.grid)
+
+    global gameOver
+    global gameWon
+
+    gameOver = False
+    gameWon = False
+    screen = pygame.display.set_mode(((board.cols + 1) * 25, (board.rows+3) * 25 + 13))
+    
+
+startGame()
 
 
 
@@ -109,31 +122,36 @@ deathTile = pygame.image.load("Minesweeper/Assets/deathTile.png")
 cross = pygame.image.load("Minesweeper/Assets/cross.png")
 
 happy = pygame.image.load("Minesweeper/Assets/happyFace.png")
-#happyPressed = pygame.image.load("Minesweeper/Assets/scaredFace.png")#
+happyPressed = pygame.image.load("Minesweeper/Assets/happyFacePressed.png")
 scared = pygame.image.load("Minesweeper/Assets/scaredFace.png")
 dead = pygame.image.load("Minesweeper/Assets/deadFace.png") 
-#deadPressed = pygame.image.load("Minesweeper/Assets/deadFace.png")#
+deadPressed = pygame.image.load("Minesweeper/Assets/deadFacePressed.png")
 win = pygame.image.load("Minesweeper/Assets/winFace.png")
-#winPressed = pygame.image.load("Minesweeper/Assets/winFacePressed.png")#
+winPressed = pygame.image.load("Minesweeper/Assets/winFacePressed.png")
 
 #fonts
 font = pygame.font.Font("Minesweeper/Assets/font.ttf", 15)
 
 
 # pygame loop
-gameOver = False
-running = True
 while running:
        
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if  event.type == pygame.QUIT:
             running = False
+
+        
         
         #clicked tile
-        if event.type == pygame.MOUSEBUTTONUP and gameOver == False:
+        if event.type == pygame.MOUSEBUTTONUP:
             x,y = pygame.mouse.get_pos()
+
+            # face reset
+            if x >= -10 + (25*board.cols)/2 and x <= 35 + (25*board.cols)/2 and y>=15 and y<=60:
+                startGame()
+                print(gameOver)
             
-            if event.button == 1 and x>=12.5 and x<(board.cols)*25 + 12.5 and y>75 and y<=(board.rows) * 25 + 75:
+            if event.button == 1 and x>=12.5 and x<(board.cols)*25 + 12.5 and y>75 and y<=(board.rows) * 25 + 75 and gameOver == False:
                 xBox = int((x-12.5)//25)
                 yBox = (y-75)//25
 
@@ -184,7 +202,7 @@ while running:
                         for i in range(board.rows):
                             for j in range(board.cols):
                                 if board.grid[j][i] == -1:
-                                    if board.tileMap[j][i] == 2:# i'm a fucking idiot who cannot index properly
+                                    if board.tileMap[j][i] == 2:
                                         board.endMap[j][i] = 1 # 1 = cross
                                     board.tileMap[j][i] = 0
                                     
@@ -197,7 +215,7 @@ while running:
 
         
         #flag tile
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and gameOver == False:
             x,y = pygame.mouse.get_pos()
             
             if event.button == 3 and x>=12.5 and x<(board.cols)*25 + 12.5 and y>75 and y<=(board.rows) * 25 + 75:
@@ -280,36 +298,54 @@ while running:
                 if board.endMap[j][i] == 1:
                     screen.blit(cross, (25 +(25*j) - (12.5) ,87.5 + (25*i) - (12.5)))
 
-            
-                    
+        
+
+    # Face Display
+    if gameOver== False:
+        screen.blit(happy, (-10 + (25*board.cols)/2,15))
+    if gameOver== True and gameWon == False:
+        screen.blit(dead, (-10 + (25*board.cols)/2,15))
+    if gameOver== True and gameWon == True:
+        screen.blit(win, (-10 + (25*board.cols)/2,15))   
+   
             
 
     #pressed tile
     if pygame.mouse.get_pressed()[0]:
         x,y = pygame.mouse.get_pos()
         
-        if x>=12.5 and x<(board.cols)*25 + 12.5 and y>75 and y<=(board.rows) * 25 + 75:
+        #tile press
+        if x>=12.5 and x<(board.cols)*25 + 12.5 and y>75 and y<=(board.rows) * 25 + 75 and gameOver == False:
             xBox = int((x-12.5)//25)
             yBox = (y-75)//25
 
             if xBox < board.cols and yBox < board.rows and board.tileMap[xBox][yBox] == 1:
                 screen.blit(pressedTileImg, (25 +(25*xBox) - (12.5) ,87.5 + (25*yBox) - (12.5)))   # +2 here for centering reasons
+                screen.blit(scared, (-10 + (25*board.cols)/2,15)) 
+
+        # Face Press
+        if x >= -10 + (25*board.cols)/2 and x <= 35 + (25*board.cols)/2 and y>=15 and y<=60:
+            if gameOver!= True:
+                screen.blit(happyPressed, (-10 + (25*board.cols)/2,15))
+            if gameOver== True and gameWon == False:
+                screen.blit(deadPressed, (-10 + (25*board.cols)/2,15))
+            if gameOver== True and gameWon == True:
+                screen.blit(winPressed, (-10 + (25*board.cols)/2,15))   
+
+        
 
 
-    # face display
-
-    if gameOver!= True:
-        screen.blit(happy, (-10 + (25*board.cols)/2,15))
-    if gameOver== True:
-        screen.blit(dead, (-10 + (25*board.cols)/2,15))
+   # print(board.grid)
 
 
-    
 
+   
+            
 
 
     pygame.display.flip()
     #pygame.display.update()
+
 
 
 
