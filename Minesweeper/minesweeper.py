@@ -1,5 +1,7 @@
 #minesweeper test
 import random,pygame
+clock = pygame.time.Clock()
+pygame.time.set_timer(pygame.USEREVENT,1000)
 
 
 
@@ -16,7 +18,7 @@ class NewBoard:
 
 
     def placeMines(self, difficulty):
-        numberOfMines = (board.cols * board.rows * difficulty) // 10
+        numberOfMines = (self.cols * self.rows * difficulty) // 10
 
         for i in range(numberOfMines):
             x = random.randint(0,self.cols-1)
@@ -70,7 +72,7 @@ class NewBoard:
 
 
 
-board = NewBoard(5,5)   #  (rows,cols) 
+board = NewBoard(10,10)   #  (rows,cols) 
 difficulty = 2  # 0 - 3
 
 running = True
@@ -79,15 +81,19 @@ def startGame():
     board.createMaps()
     board.placeMines(difficulty)
 
-    print(board.tileMap)
-    print(board.grid)
-
     global gameOver
     global gameWon
+    global timer
+    global flagsLeft
 
+
+    flagsLeft = 99
+    timer = 0
     gameOver = False
     gameWon = False
     screen = pygame.display.set_mode(((board.cols + 1) * 25, (board.rows+3) * 25 + 13))
+
+    
     
 
 startGame()
@@ -140,6 +146,12 @@ while running:
         if  event.type == pygame.QUIT:
             running = False
 
+        #timer
+        elif  event.type == pygame.USEREVENT and timer <= 998 and gameOver == False:
+            timer += 1
+            print(timer)
+        clock.tick(60)
+
         
         
         #clicked tile
@@ -149,7 +161,7 @@ while running:
             # face reset
             if x >= -10 + (25*board.cols)/2 and x <= 35 + (25*board.cols)/2 and y>=15 and y<=60:
                 startGame()
-                print(gameOver)
+                
             
             if event.button == 1 and x>=12.5 and x<(board.cols)*25 + 12.5 and y>75 and y<=(board.rows) * 25 + 75 and gameOver == False:
                 xBox = int((x-12.5)//25)
@@ -208,9 +220,25 @@ while running:
                                     
                         board.tileMap[xBox][yBox] = 3
 
-                        #delete
-                        for i in range(len(board.tileMap)):
-                            print(board.endMap[i])
+                    
+                    # win conditions
+                    tilesLeft = 0
+                    for i in range(board.rows):
+                            for j in range(board.cols):
+                                if board.tileMap[j][i] == 1 or board.tileMap[j][i] == 2 :
+                                    tilesLeft += 1
+                    if tilesLeft == (board.cols * board.rows * difficulty) // 10:
+                        gameOver = True
+                        gameWon = True
+                        for i in range(board.rows):
+                            for j in range(board.cols):
+                                if board.grid[j][i] == -1:
+                                    board.tileMap[j][i] = 0
+                                    board.endMap[j][i] = 1
+                                
+
+                    
+
 
 
         
@@ -223,10 +251,13 @@ while running:
                 yBox = (y-75)//25
 
                 if xBox < board.cols and yBox < board.rows:
-                    if board.tileMap[xBox][yBox] == 1:
+                    if board.tileMap[xBox][yBox] == 1 and flagsLeft > 0:
                         board.tileMap[xBox][yBox] = 2
+                        flagsLeft -= 1
                     elif board.tileMap[xBox][yBox] == 2:
                         board.tileMap[xBox][yBox] = 1
+                        flagsLeft += 1
+                    
 
     screen.fill(grey)
 
@@ -335,8 +366,7 @@ while running:
         
 
 
-   # print(board.grid)
-
+   
 
 
    
