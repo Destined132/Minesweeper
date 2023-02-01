@@ -91,7 +91,7 @@ def startGame():
     timer = 0
     gameOver = False
     gameWon = False
-    screen = pygame.display.set_mode(((board.cols + 1) * 25, (board.rows+3) * 25 + 13))
+    screen = pygame.display.set_mode(((board.cols + 1) * 25, (board.rows+3) * 25 + 13))  #  width and height
 
     
     
@@ -126,6 +126,8 @@ flagImg = pygame.image.load("Minesweeper/Assets/flag.png")
 tileImg = pygame.image.load("Minesweeper/Assets/hiddentile.png")
 deathTile = pygame.image.load("Minesweeper/Assets/deathTile.png")
 cross = pygame.image.load("Minesweeper/Assets/cross.png")
+edgeH = pygame.image.load("Minesweeper/Assets/edgeH.png")
+edgeV = pygame.image.load("Minesweeper/Assets/edgeV.png")
 
 happy = pygame.image.load("Minesweeper/Assets/happyFace.png")
 happyPressed = pygame.image.load("Minesweeper/Assets/happyFacePressed.png")
@@ -182,10 +184,9 @@ while running:
                                     current = queue[0]
 
                                     try:
-                                        if not(current in visited) and current[0]+k >= 0 and current[1]+l >= 0 and (i,j) != (0,0) and board.grid[current[0]+k][current[1]+l] == 0:
+                                        if not(current in visited) and current[0]+k >= 0 and current[1]+l >= 0 and (k,l) != (0,0) and board.grid[current[0]+k][current[1]+l] == 0:
                                             queue.append(((current[0]+k),current[1]+l))
-                                    
-
+                                
                                     except IndexError:
                                         pass
 
@@ -197,16 +198,16 @@ while running:
                         for n in range(len(visited)):
                             current = visited[n]
                             for k in range(-1,2):
-                                    for l in range(-1,2):
+                                for l in range(-1,2):
 
-                                        try:
-                                            if current[0]+k >= 0 and current[1]+l >= 0 and (i,j) != (0,0) and board.tileMap[current[0]+k][current[1]+l] == 1:
-                                                board.tileMap[current[0]+k][current[1]+l] = 0
-                                        
+                                    try:
+                                        if current[0]+k >= 0 and current[1]+l >= 0 and (k,l) != (0,0) and board.tileMap[current[0]+k][current[1]+l] == 1:
+                                            board.tileMap[current[0]+k][current[1]+l] = 0
+                                    
 
-                                        except IndexError:
-                                            pass
-                    
+                                    except IndexError:
+                                        pass
+                
                     # end game sequence
                     if board.grid[xBox][yBox] == -1:
                         gameOver = True
@@ -338,6 +339,8 @@ while running:
         screen.blit(dead, (-10 + (25*board.cols)/2,15))
     if gameOver== True and gameWon == True:
         screen.blit(win, (-10 + (25*board.cols)/2,15))   
+
+
    
             
 
@@ -363,7 +366,13 @@ while running:
             if gameOver== True and gameWon == True:
                 screen.blit(winPressed, (-10 + (25*board.cols)/2,15))   
 
-        
+    # Border Display
+    for i in range(board.cols//2):
+        screen.blit(edgeH,(i*12.5*board.cols/2,-1))
+        screen.blit(edgeH,(i*12.5*board.cols/2,(board.cols+3) * 25))
+    for i in range(board.rows):
+        screen.blit(edgeV,(-3,(board.rows+3)*3*i))
+        screen.blit(edgeV,((board.cols+0.5) * 25,(board.rows+3)*3*i))
 
 
    
